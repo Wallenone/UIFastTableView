@@ -18,17 +18,17 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+这是一个被封装的控件快捷使用类库，里面有demo，通过demo直接可以使用控件类库
                        DESC
 
-  s.homepage         = 'https://github.com/wanjiehuizhaofang/UIFastTableView'
+  s.homepage         = 'www.baidu.com'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'wanjiehuizhaofang' => 'wanjie@huizhaofang.com' }
-  s.source           = { :git => 'https://github.com/wanjiehuizhaofang/UIFastTableView.git', :tag => s.version.to_s }
+  s.author           = { 'wallen' => '910082734@qq.com' }
+  s.source           = { :git => 'https://github.com/Wallenone/UIFastTableView', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '7.0'
 
   s.source_files = 'UIFastTableView/Classes/**/*'
   
@@ -39,4 +39,5 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+    s.dependency 'MJRefresh'
 end
