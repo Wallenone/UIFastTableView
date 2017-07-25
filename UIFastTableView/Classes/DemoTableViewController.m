@@ -45,7 +45,7 @@
     }];
     
     //动态改变
-    [_tbv onChangeCellHeight:^CGFloat(NSIndexPath *indexPath) {
+    [_tbv onChangeCellHeight:^CGFloat(NSIndexPath *indexPath,id cellData) {
         
         if (indexPath.row==1) {
             return 100.0;
