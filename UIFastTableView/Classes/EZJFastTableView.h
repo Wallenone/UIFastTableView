@@ -16,7 +16,7 @@ typedef UITableViewCell * (^BuildCellBlock)(id,NSString *,NSIndexPath *);
 typedef void (^CellSelectedBlock)(id,id);
 typedef NSArray* (^DragUpBlock)(int);
 typedef void (^DragDownBlock)();
-typedef CGFloat (^AutoChangeCellHeightBlock)(id);
+typedef CGFloat (^AutoChangeCellHeightBlock)(id,id);
 typedef NSArray*(^TitleForHeaderInSection)(void);
 @interface EZJFastTableView : UITableView<UITableViewDelegate,UITableViewDataSource>
 

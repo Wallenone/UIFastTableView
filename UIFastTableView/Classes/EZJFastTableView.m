@@ -84,7 +84,7 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     if (autoChangeCellHeightBlock) {
-        return autoChangeCellHeightBlock(indexPath);
+        return autoChangeCellHeightBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
     }
     return self.rowHeight;
 }
