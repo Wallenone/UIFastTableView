@@ -79,6 +79,8 @@ typedef NSArray*(^TitleForHeaderInSection)(void);
 - (void)onChangeCellHeight:(AutoChangeCellHeightBlock)block;
 
 
+- (void)updateData:(NSArray *)arr;
+
 @end
 
 

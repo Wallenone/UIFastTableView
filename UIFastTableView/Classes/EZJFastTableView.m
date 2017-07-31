@@ -62,6 +62,16 @@
     }
 }
 
+-(void)updateData:(NSArray *)arr{
+    if (arr) {
+        [arrayDatas removeAllObjects];
+        arrayDatas=[arr mutableCopy];
+        [self reloadData];
+    }
+    
+    
+}
+
 -(void)onBuildCell:(BuildCellBlock)block{
     if (block) {
         buildCellBlock=block;
@@ -132,7 +142,7 @@
     if (cellSelectedBlock) {
         cellSelectedBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
     }
-   //[tableView deselectRowAtIndexPath:indexPath animated:YES];
+    //[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 // 去掉UItableview headerview黏性
