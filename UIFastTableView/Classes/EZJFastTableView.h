@@ -16,8 +16,9 @@ typedef UITableViewCell * (^BuildCellBlock)(id,NSString *,NSIndexPath *);
 typedef void (^CellSelectedBlock)(id,id);
 typedef NSArray* (^DragUpBlock)(int);
 typedef void (^DragDownBlock)();
-typedef CGFloat (^AutoChangeCellHeightBlock)(id);
+typedef CGFloat (^AutoChangeCellHeightBlock)(id,id);
 typedef NSArray*(^TitleForHeaderInSection)(void);
+typedef void (^Cellediting)(void);
 @interface EZJFastTableView : UITableView<UITableViewDelegate,UITableViewDataSource>
 
 @property (nonatomic, strong) void(^onTableViewDidScroll)(EZJFastTableView *tableView, CGPoint contentOffset);
@@ -78,6 +79,10 @@ typedef NSArray*(^TitleForHeaderInSection)(void);
  */
 - (void)onChangeCellHeight:(AutoChangeCellHeightBlock)block;
 
+
+- (void)updateData:(NSArray *)arr;
+
+- (void)onCellediting:(Cellediting)block;
 
 @end
 

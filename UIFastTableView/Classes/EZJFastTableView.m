@@ -32,6 +32,7 @@
     DragUpBlock dragUpBlock;
     DragDownBlock dragDownBlock;
     AutoChangeCellHeightBlock autoChangeCellHeightBlock;
+    Cellediting cellediting;
 }
 //@synthesize customerViewName,columnNumber,reFreshPage;
 //@synthesize leftMargin,apartMargin,cellWidth;
@@ -62,6 +63,16 @@
     }
 }
 
+-(void)updateData:(NSArray *)arr{
+    if (arr) {
+        [arrayDatas removeAllObjects];
+        arrayDatas=[arr mutableCopy];
+        [self reloadData];
+    }
+    
+    
+}
+
 -(void)onBuildCell:(BuildCellBlock)block{
     if (block) {
         buildCellBlock=block;
@@ -81,10 +92,16 @@
     }
 }
 
+- (void)onCellediting:(Cellediting)block{
+    if (block) {
+        cellediting=block;
+    }
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     if (autoChangeCellHeightBlock) {
-        return autoChangeCellHeightBlock(indexPath);
+        return autoChangeCellHeightBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
     }
     return self.rowHeight;
 }
@@ -119,6 +136,28 @@
 }
 
 
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(cellediting){
+        return YES;
+    }else{
+        return NO;
+    }
+    
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        [arrayDatas removeObjectAtIndex:indexPath.row];
+        [self deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        
+    }
+    else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        
+    }
+}
+
+
 /*- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
 	NSData * tempArchive = [NSKeyedArchiver archivedDataWithRootObject:_sectionHeaderView];
 	return [NSKeyedUnarchiver unarchiveObjectWithData:tempArchive];
@@ -132,7 +171,7 @@
     if (cellSelectedBlock) {
         cellSelectedBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
     }
-   //[tableView deselectRowAtIndexPath:indexPath animated:YES];
+    //[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 // 去掉UItableview headerview黏性

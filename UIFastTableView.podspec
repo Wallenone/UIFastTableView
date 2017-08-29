@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'UIFastTableView'
-  s.version          = '0.1.0'
+  s.version          = '0.1.7'
   s.summary          = 'A short description of UIFastTableView.'
 
 # This description is used to generate tags and improve search results.
