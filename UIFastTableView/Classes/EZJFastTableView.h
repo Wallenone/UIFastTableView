@@ -78,12 +78,20 @@ typedef void (^Cellediting)(void);
  *  动态改变cell的高度
  */
 - (void)onChangeCellHeight:(AutoChangeCellHeightBlock)block;
-
-
+//更新数据
 - (void)updateData:(NSArray *)arr;
 
+//插入数据
+- (void)insertData:(id)data;
+
+//右滑动删除
 - (void)onCellediting:(Cellediting)block;
 
+//滚动到顶部
+- (void)scrollToTop:(BOOL)animated;
+
+//滚动到底部
+- (void)scrollToBottom:(BOOL)animated;
 @end
 
 

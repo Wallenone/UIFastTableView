@@ -22,10 +22,15 @@
 #define MJRandomData [NSString stringWithFormat:@"随机数据---%d", arc4random_uniform(1000000)]
 
 
+@interface EZJFastTableView()
+@property(nonatomic,strong)NSMutableArray   *arrayDatas;/**<数据源数据*/
+
+@end
+
 @implementation EZJFastTableView
 {
     
-    NSMutableArray   *arrayDatas;/**<数据源数据*/
+
     int  currentPage;
     BuildCellBlock buildCellBlock;
     CellSelectedBlock cellSelectedBlock;
@@ -39,10 +44,18 @@
 
 - (id)init{
     if (self = [super init]) {
-        arrayDatas = [NSMutableArray array];
+        self.arrayDatas = [NSMutableArray array];
         //_isSectionStickyHeader = YES;
     }
     return self;
+}
+
+-(NSMutableArray *)arrayDatas{
+    if (!_arrayDatas) {
+        _arrayDatas=[NSMutableArray array];
+    }
+    
+    return _arrayDatas;
 }
 
 #pragma mark - 单行tableview初始化 block回调
@@ -59,18 +72,23 @@
 
 - (void)setDataArray:(NSArray *)arr{
     if (arr) {
-        arrayDatas=[arr mutableCopy];
+        self.arrayDatas=[arr mutableCopy];
     }
 }
 
 -(void)updateData:(NSArray *)arr{
     if (arr) {
-        [arrayDatas removeAllObjects];
-        arrayDatas=[arr mutableCopy];
+        [self.arrayDatas removeAllObjects];
+        self.arrayDatas=[arr mutableCopy];
         [self reloadData];
     }
-    
-    
+}
+
+- (void)insertData:(id)data{
+    if (data) {
+        [self.arrayDatas addObject:data];
+        [self reloadData];
+    }
 }
 
 -(void)onBuildCell:(BuildCellBlock)block{
@@ -98,19 +116,36 @@
     }
 }
 
+- (void)scrollToTop:(BOOL)animated {
+    [self setContentOffset:CGPointMake(0,0) animated:animated];
+}
+
+- (void)scrollToBottom:(BOOL)animated {
+    NSUInteger sectionCount = [self numberOfSections];
+    if (sectionCount) {
+        NSUInteger rowCount = [self numberOfRowsInSection:0];
+        if (rowCount) {
+            NSUInteger ii[2] = {0, rowCount-1};
+            NSIndexPath* indexPath = [NSIndexPath indexPathWithIndexes:ii length:2];
+            [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom
+                                animated:animated];
+        }
+    }
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     if (autoChangeCellHeightBlock) {
-        return autoChangeCellHeightBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
+        return autoChangeCellHeightBlock(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
     }
     return self.rowHeight;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    if (!arrayDatas) {
+    if (!self.arrayDatas) {
         return 0;
     }
-    return arrayDatas.count;
+    return self.arrayDatas.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -120,7 +155,7 @@
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
     if(cell==nil){
-        cell=buildCellBlock([arrayDatas objectAtIndex:indexPath.row],cellIdentifier,indexPath);
+        cell=buildCellBlock([self.arrayDatas objectAtIndex:indexPath.row],cellIdentifier,indexPath);
     }
     
     //cell.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -148,7 +183,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        [arrayDatas removeObjectAtIndex:indexPath.row];
+        [self.arrayDatas removeObjectAtIndex:indexPath.row];
         [self deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
         
     }
@@ -169,7 +204,7 @@
     NSNotification *notification =[NSNotification notificationWithName:@"userdata_event" object:nil userInfo:@{@"name":@"click"}];
     [[NSNotificationCenter defaultCenter] postNotification:notification];
     if (cellSelectedBlock) {
-        cellSelectedBlock(indexPath,[arrayDatas objectAtIndex:indexPath.row]);
+        cellSelectedBlock(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
     }
     //[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -198,7 +233,7 @@
             NSArray *cellDatas =dragUpBlock(currentPage);
             
             if (cellDatas.count>0) {
-                [arrayDatas addObjectsFromArray:cellDatas];
+                [self.arrayDatas addObjectsFromArray:cellDatas];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self reloadData];
                 });

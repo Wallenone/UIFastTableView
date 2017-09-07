@@ -10,6 +10,8 @@
 #endif
 #endif
 
+#import "DemoTableViewController.h"
+#import "EZJFastTableView.h"
 
 FOUNDATION_EXPORT double UIFastTableViewVersionNumber;
 FOUNDATION_EXPORT const unsigned char UIFastTableViewVersionString[];
