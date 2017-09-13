@@ -59,8 +59,8 @@
 
     
     //允许上行滑动
-	 [_tbv onDragUp:^NSArray * (int page) {
-        return [self loadNewData:page];
+	 [_tbv onDragUp:^void (int page) {
+       // return [self loadNewData:page];
      }];
    
     //允许下行滑动刷新

@@ -30,7 +30,7 @@
 @implementation EZJFastTableView
 {
     
-
+    
     int  currentPage;
     BuildCellBlock buildCellBlock;
     CellSelectedBlock cellSelectedBlock;
@@ -84,9 +84,11 @@
     }
 }
 
-- (void)insertData:(id)data{
-    if (data) {
-        [self.arrayDatas addObject:data];
+- (void)insertData:(NSArray *)data{
+    if (data.count>0) {
+        for (id model in data) {
+            [self.arrayDatas addObject:model];
+        }
         [self reloadData];
     }
 }
@@ -230,18 +232,23 @@
         self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
             [self.mj_footer endRefreshing];
             currentPage=currentPage+1;
-            NSArray *cellDatas =dragUpBlock(currentPage);
-            
-            if (cellDatas.count>0) {
-                [self.arrayDatas addObjectsFromArray:cellDatas];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self reloadData];
-                });
-            }else{
-                [self.mj_footer endRefreshingWithNoMoreData];
-            }
+            dragUpBlock(currentPage);
+            //
+            //            if (cellDatas.count>0) {
+            //                [self.arrayDatas addObjectsFromArray:cellDatas];
+            //                dispatch_async(dispatch_get_main_queue(), ^{
+            //                    [self reloadData];
+            //                });
+            //            }else{
+            //                [self.mj_footer endRefreshingWithNoMoreData];
+            //            }
         }];
     }
+}
+
+
+-(void)onDragUpEnd{
+    [self.mj_footer endRefreshingWithNoMoreData];
 }
 
 - (void)onDragDown:(DragDownBlock)block{
