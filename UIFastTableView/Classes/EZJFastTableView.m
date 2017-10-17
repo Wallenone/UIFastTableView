@@ -22,7 +22,9 @@
 #define MJRandomData [NSString stringWithFormat:@"随机数据---%d", arc4random_uniform(1000000)]
 
 
-@interface EZJFastTableView()
+@interface EZJFastTableView(){
+    BOOL _drogUpState;  //是否开启上啦加载
+}
 @property(nonatomic,strong)NSMutableArray   *arrayDatas;/**<数据源数据*/
 
 @end
@@ -44,6 +46,7 @@
 
 - (id)init{
     if (self = [super init]) {
+        _drogUpState=NO;
         self.arrayDatas = [NSMutableArray array];
         //_isSectionStickyHeader = YES;
     }
@@ -84,13 +87,26 @@
     }
 }
 
-- (void)insertData:(NSArray *)data{
-    if (data.count>0) {
-        for (id model in data) {
-            [self.arrayDatas addObject:model];
-        }
+- (void)insertData:(id)data{
+    if (data) {
+        [self.arrayDatas addObject:data];
         [self reloadData];
     }
+}
+
+- (void)addData:(NSArray *)arr{
+    if (_drogUpState) {
+        if (arr.count>0) {
+            for (id cellData in arr) {
+                [self.arrayDatas addObject:cellData];
+            }
+            [self reloadData];
+        }
+        //            else{
+        //            [self.mj_footer endRefreshingWithNoMoreData];
+        //        }
+    }
+    
 }
 
 -(void)onBuildCell:(BuildCellBlock)block{
@@ -232,8 +248,9 @@
         self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
             [self.mj_footer endRefreshing];
             currentPage=currentPage+1;
+            
             dragUpBlock(currentPage);
-            //
+            _drogUpState=YES;
             //            if (cellDatas.count>0) {
             //                [self.arrayDatas addObjectsFromArray:cellDatas];
             //                dispatch_async(dispatch_get_main_queue(), ^{
@@ -244,11 +261,6 @@
             //            }
         }];
     }
-}
-
-
--(void)onDragUpEnd{
-    [self.mj_footer endRefreshingWithNoMoreData];
 }
 
 - (void)onDragDown:(DragDownBlock)block{
@@ -266,6 +278,10 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.onTableViewDidScroll ? self.onTableViewDidScroll(self, scrollView.contentOffset) : nil;
+}
+
+- (void)noMoreData{
+    [self.mj_footer endRefreshingWithNoMoreData];
 }
 
 @end

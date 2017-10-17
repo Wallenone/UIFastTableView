@@ -82,7 +82,9 @@ typedef void (^Cellediting)(void);
 - (void)updateData:(NSArray *)arr;
 
 //插入数据
-- (void)insertData:(NSArray *)data;
+- (void)insertData:(id)data;
+
+- (void)addData:(NSArray *)arr;
 
 //右滑动删除
 - (void)onCellediting:(Cellediting)block;
@@ -93,7 +95,7 @@ typedef void (^Cellediting)(void);
 //滚动到底部
 - (void)scrollToBottom:(BOOL)animated;
 
--(void)onDragUpEnd;
+- (void)noMoreData;
 @end
 
 
