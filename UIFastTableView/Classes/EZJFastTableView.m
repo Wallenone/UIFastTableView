@@ -1,301 +1,307 @@
 //
-//  IndexViewController.m
-//  ChineseGirl
+//  EASYTableView.m
+//  SyUtils
 //
-//  Created by wallen on 2017/8/8.
-//  Copyright © 2017年 wanjiehuizhaofang. All rights reserved.
+//  Created by wallen on 15/12/15.
+//  Copyright (c) 2015年 wallen. All rights reserved.
 //
 
-#import "IndexViewController.h"
-#import "BHInfiniteScrollView.h"
 #import "EZJFastTableView.h"
-#import "MyIndexViewController.h"
-#import "CGFriendsAddViewController.h"
-#import "EZJFastTableView.h"
-#import "WSCollectionHeaderCell.h"
-#import "CGIndexModel.h"
-#import "WSCollectionCell.h"
-#import "XLVideoCell.h"
-#import "XLVideoPlayer.h"
-#import <AVFoundation/AVFoundation.h>
-#import "CGVideoViewController.h"
-@interface IndexViewController ()<BHInfiniteScrollViewDelegate,HzfNavigationBarDelegate,UIScrollViewDelegate>{
-    NSIndexPath *_indexPath;
-    
+
+
+#import "MJRefresh.h"
+
+
+// objc_msgSend
+#define msgSend(...) ((void (*)(void *, SEL, NSObject *))objc_msgSend)(__VA_ARGS__)
+#define msgTarget(target) (__bridge void *)(target)
+
+/**
+ * 随机数据
+ */
+#define MJRandomData [NSString stringWithFormat:@"随机数据---%d", arc4random_uniform(1000000)]
+
+
+@interface EZJFastTableView(){
+    BOOL _drogUpState;  //是否开启上啦加载
 }
-@property(nonatomic,strong)UIView *headerView;
-@property(nonatomic,strong)UIButton *rightIcon;
-@property(nonatomic,strong)UIImageView *titleImg;
-@property(nonatomic,strong)UILabel *titleLabel;
-@property(nonatomic,strong)UIView *lineView;
-@property (nonatomic, strong)UIView* infinitePageView;
-@property (nonatomic, strong)UIImageView *infiniteImgView;
-@property(nonatomic,strong)EZJFastTableView *tbv;
-@property(nonatomic,strong)XLVideoPlayer *player;
+@property(nonatomic,strong)NSMutableArray   *arrayDatas;/**<数据源数据*/
+
 @end
 
-@implementation IndexViewController
-
--(void)viewWillAppear:(BOOL)animated
+@implementation EZJFastTableView
 {
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
-    [self.navigationController setNavigationBarHidden:YES animated:animated];
-    [super viewWillAppear:animated];
-    [self.tabBarController.tabBar setHidden:NO];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
     
-    [self.player destroyPlayer];
-    self.player = nil;
-}
-
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    self.automaticallyAdjustsScrollViewInsets = NO;
-    self.view.backgroundColor=[UIColor getColor:@"EEEEEE"];
     
-    [self setHeaderView];
-    [self addSubViews];
-    
+    int  currentPage;
+    BuildCellBlock buildCellBlock;
+    CellSelectedBlock cellSelectedBlock;
+    DragUpBlock dragUpBlock;
+    DragDownBlock dragDownBlock;
+    AutoChangeCellHeightBlock autoChangeCellHeightBlock;
+    Cellediting cellediting;
+    ScollViewDidBlock scollViewDidBlock;
+}
+//@synthesize customerViewName,columnNumber,reFreshPage;
+//@synthesize leftMargin,apartMargin,cellWidth;
+
+- (id)init{
+    if (self = [super init]) {
+        _drogUpState=NO;
+        self.arrayDatas = [NSMutableArray array];
+        //_isSectionStickyHeader = YES;
+    }
+    return self;
 }
 
--(void)setHeaderView{
-    [self.view addSubview:self.headerView];
-    // [self.headerView addSubview:self.titleImg];
-    [self.headerView addSubview:self.titleLabel];
-    [self.headerView addSubview:self.rightIcon];
-    [self.view addSubview:self.lineView];
-}
-
-
-
-- (void)addFriend{
-    CGFriendsAddViewController *addVC=[[CGFriendsAddViewController alloc] init];
-    [self.navigationController pushViewController:addVC animated:NO];
-}
-
--(void)addSubViews{
-    [self.view addSubview:self.tbv];
-}
-
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)infiniteScrollView:(BHInfiniteScrollView *)infiniteScrollView didScrollToIndex:(NSInteger)index {
-    //NSLog(@"did scroll to index %ld", index);
-}
-
-- (void)infiniteScrollView:(BHInfiniteScrollView *)infiniteScrollView didSelectItemAtIndex:(NSInteger)index {
-    //NSLog(@"did select item at index %ld", index);
-}
--(UIView *)headerView{
-    if (!_headerView) {
-        _headerView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, screen_width, 64*SCREEN_RADIO)];
-        _headerView.backgroundColor=[UIColor whiteColor];
+-(NSMutableArray *)arrayDatas{
+    if (!_arrayDatas) {
+        _arrayDatas=[NSMutableArray array];
     }
     
-    return _headerView;
+    return _arrayDatas;
 }
 
--(UIButton *)rightIcon{
-    if (!_rightIcon) {
-        _rightIcon=[[UIButton alloc] initWithFrame:CGRectMake(screen_width-32*SCREEN_RADIO, 32*SCREEN_RADIO, 22*SCREEN_RADIO, 22*SCREEN_RADIO)];
-        [_rightIcon setImage:[UIImage imageNamed:@"addFriends"] forState:UIControlStateNormal];
-        [_rightIcon addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
-    }
-    return _rightIcon;
-}
-
--(UIImageView *)titleImg{
-    if (!_titleImg) {
-        _titleImg=[[UIImageView alloc] initWithFrame:CGRectMake(screen_width/2-47*SCREEN_RADIO, 32*SCREEN_RADIO, 94*SCREEN_RADIO, 27*SCREEN_RADIO)];
-        _titleImg.image=[UIImage imageNamed:@"BitmapIcon"];
-    }
-    return _titleImg;
-}
-
--(UILabel *)titleLabel{
-    if (!_titleLabel) {
-        _titleLabel=[[UILabel alloc] initWithFrame:CGRectMake(0, 32*SCREEN_RADIO, screen_width, 30*SCREEN_RADIO)];
-        _titleLabel.text=@"ChineseGirl";
-        _titleLabel.textColor=[UIColor getColor:@"1D1D1B"];
-        _titleLabel.font=[UIFont fontWithName:@"Billabong" size:25*SCREEN_RADIO];
-        _titleLabel.textAlignment=NSTextAlignmentCenter;
+#pragma mark - 单行tableview初始化 block回调
+- (id)initWithFrame:(CGRect)frame{
+    if (self = [super initWithFrame:frame]) {
+        
+        currentPage=0;
+        self.delegate = self;
+        self.dataSource = self;
     }
     
-    return _titleLabel;
+    return self;
 }
 
--(UIView *)lineView{
-    if (!_lineView) {
-        _lineView=[[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.headerView.frame)-1, screen_width, 1)];
-        _lineView.backgroundColor=[UIColor getColor:@"FAFAFA"];
-    }
-    
-    return _lineView;
-}
-
--(void)getCollectionData:(NSInteger)page{
-    NSMutableArray *array = [CGIndexModel reloadTableWithRangeFrom:page*10 rangeTLenth:10];
-    if (array.count>0) {
-        [self.tbv addContentData:array];
-    }else{
-        [self.tbv noMoreData];
+- (void)setDataArray:(NSArray *)arr{
+    if (arr) {
+        self.arrayDatas=[arr mutableCopy];
     }
 }
 
--(CGFloat)getCellHeightWithModel:(CGIndexModel*)model{
-    if([model.type integerValue]==1){
-        CGFloat _height=56*SCREEN_RADIO;
-        if (model.pictureBigs.count==1 || model.pictureBigs.count==2) {
-            _height+=284*SCREEN_RADIO;
-        }else if(model.pictureBigs.count==4){
-            _height+=284*SCREEN_RADIO-6*SCREEN_RADIO;
-        }else if(model.pictureBigs.count==3){
-            _height+=(screen_width-42*SCREEN_RADIO)/3;
-        }else if (model.pictureBigs.count==5 || model.pictureBigs.count==6){
-            _height+=((screen_width-42*SCREEN_RADIO)/3)*2+6*SCREEN_RADIO;
+-(void)updateData:(NSArray *)arr{
+    if (arr) {
+        [self.arrayDatas removeAllObjects];
+        self.arrayDatas=[arr mutableCopy];
+        [self reloadData];
+    }
+}
+
+- (void)insertData:(id)data{
+    if (data) {
+        [self.arrayDatas addObject:data];
+        [self reloadData];
+    }
+}
+
+- (void)addData:(NSArray *)arr{
+    if (_drogUpState) {
+        if (arr.count>0) {
+            for (id cellData in arr) {
+                [self.arrayDatas addObject:cellData];
+            }
+            [self reloadData];
         }
-        return _height;
+        //            else{
+        //            [self.mj_footer endRefreshingWithNoMoreData];
+        //        }
     }
     
-    return 340*SCREEN_RADIO;
 }
 
--(EZJFastTableView *)tbv{
-    if (!_tbv) {
-        
-        __weak typeof(self) weakSelf = self;
-        CGRect tbvFrame = CGRectMake(0, 64*SCREEN_RADIO, self.view.frame.size.width, screen_height-104*SCREEN_RADIO);
-        //初始化
-        
-        _tbv = [[EZJFastTableView alloc]initWithFrame:tbvFrame];
-        _tbv.separatorStyle=UITableViewCellSeparatorStyleNone;
-        _tbv.backgroundColor=[UIColor getColor:@"EEEEEE"];
-        //给tableview赋值
-        NSMutableArray *newArr=[CGIndexModel reloadTableWithRangeFrom:0 rangeTLenth:10];
-        [newArr insertObject:@"headerView" atIndex:0];
-        [_tbv setDataArray:newArr];
-        
-        [_tbv onBuildCell:^(id cellData,NSString *cellIdentifier,NSIndexPath *index) {
-            UITableViewCell *inCell;
-            if (index.row==0) {
-                WSCollectionHeaderCell *cell = [[WSCollectionHeaderCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
-                
-                return (UITableViewCell *)cell;
-            }else{
-                CGIndexModel *indexModel=(CGIndexModel *)cellData;
-                if ([indexModel.type integerValue]==1) {
-                    WSCollectionCell *cell = [[WSCollectionCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier WithModel:indexModel];
-                    return (UITableViewCell *)cell;
-                }else if ([indexModel.type integerValue]==2){
-                    XLVideoCell *cell = [[XLVideoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier withModel:indexModel withImg:indexModel.videoPic];
-                    return (UITableViewCell *)cell;
-                }
-            }
-            
-            
-            return (UITableViewCell *)inCell;
-            
-            
-            
-        }];
-        
-        //动态改变
-        
-        [_tbv onChangeCellHeight:^CGFloat(NSIndexPath *indexPath,id cellData) {
-            
-            if (indexPath.row==0) {
-                return 104*SCREEN_RADIO;
-            }
-            
-            CGFloat _height=[weakSelf getCellHeightWithModel:cellData];
-            return _height;
-        }];
-        
-        
-        
-        //允许上行滑动
-        [_tbv onDragUp:^(int page) {
-            [weakSelf getCollectionData:page];
-        }];
-        
-        //允许下行滑动刷新
-        //            [_tbv onDragDown:^{
-        //                [weakSelf getCollectionData];
-        //            }];
-        
-        
-        //设置选中事件 block设置方式
-        //indexPath  是当前行对象 indexPath.row(获取行数)
-        //cellData 是当前行的数据
-        
-        [_tbv onCellSelected:^(NSIndexPath *indexPath, id cellData) {
-            NSLog(@"click");
-            if (indexPath.row!=0) {
-                CGIndexModel *indexModel=(CGIndexModel *)cellData;
-                if ([indexModel.type integerValue]==2) {
-                    [self showVideoPlayer:indexPath withcellData:cellData];
-                }
-            }
-        }];
-        
-        [_tbv onScrollDid:^(UIScrollView *scrollView) {
-            if ([scrollView isEqual:self.tbv]) {
-                [weakSelf.player playerScrollIsSupportSmallWindowPlay:NO];
-            }
-        }];
-        
+- (void)addContentData:(NSArray *)arr{
+    if (arr.count>0) {
+        for (id cellData in arr) {
+            [self.arrayDatas addObject:cellData];
+        }
+        [self reloadData];
+    }
+}
+
+-(void)onBuildCell:(BuildCellBlock)block{
+    if (block) {
+        buildCellBlock=block;
+    }
+}
+
+- (void)onCellSelected:(CellSelectedBlock)block{
+    if (block) {
+        cellSelectedBlock= block;
+    }
+}
+
+
+- (void)onChangeCellHeight:(AutoChangeCellHeightBlock)block{
+    if (block) {
+        autoChangeCellHeightBlock = block;
+    }
+}
+
+- (void)onCellediting:(Cellediting)block{
+    if (block) {
+        cellediting=block;
+    }
+}
+
+- (void)scrollToTop:(BOOL)animated {
+    [self setContentOffset:CGPointMake(0,0) animated:animated];
+}
+
+- (void)scrollToBottom:(BOOL)animated {
+    NSUInteger sectionCount = [self numberOfSections];
+    if (sectionCount) {
+        NSUInteger rowCount = [self numberOfRowsInSection:0];
+        if (rowCount) {
+            NSUInteger ii[2] = {0, rowCount-1};
+            NSIndexPath* indexPath = [NSIndexPath indexPathWithIndexes:ii length:2];
+            [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom
+                                animated:animated];
+        }
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if (autoChangeCellHeightBlock) {
+        return autoChangeCellHeightBlock(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
+    }
+    return self.rowHeight;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (!self.arrayDatas) {
+        return 0;
+    }
+    return self.arrayDatas.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    static NSString *cellIdentifier=@"cellIdentifierCell";
+    //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    
+    if(cell==nil){
+        cell=buildCellBlock([self.arrayDatas objectAtIndex:indexPath.row],cellIdentifier,indexPath);
     }
     
-    return _tbv;
+    //cell.selectionStyle = UITableViewCellSelectionStyleBlue;
+    return cell;
 }
 
-- (void)showVideoPlayer:(NSIndexPath *)index withcellData:(CGIndexModel *)cellData{
-    [_player destroyPlayer];
-    _player = nil;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 0;
+}
+
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(cellediting){
+        return YES;
+    }else{
+        return NO;
+    }
     
-    _indexPath = index;
-    XLVideoCell *cell = [self.tbv cellForRowAtIndexPath:_indexPath];
-    // [cell hiddenPlayView:YES];
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    
-    //    //2.将indexPath添加到数组
-    //    NSArray <NSIndexPath *> *indexPathArray = @[index];
-    //    //3.传入数组，对当前cell进行刷新
-    //    [self.tbv reloadRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationAutomatic];
-    
-    
-    __weak typeof(self) weakSelf = self;
-    _player = [[XLVideoPlayer alloc] initWithFrame:CGRectMake(0, 56*SCREEN_RADIO, screen_width, 284*SCREEN_RADIO) withVideoPauseBlock:^{
-        CGVideoViewController *videoVC=[[CGVideoViewController alloc] init];
-        videoVC.videoStr=cellData.bigIcon;
-        [weakSelf.navigationController presentViewController:videoVC animated:NO completion:nil];
-    } withPlayBlock:^{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        if (cellediting) {
+            cellediting(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
+        }
+        [self.arrayDatas removeObjectAtIndex:indexPath.row];
+        [self deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    }
+    else if (editingStyle == UITableViewCellEditingStyleInsert) {
         
-    }];
-    _player.videoUrl = cellData.bigIcon;
-    [_player playerBindTableView:self.tbv currentIndexPath:_indexPath];
-    
-    [cell.contentView addSubview:_player];
-    
-    _player.completedPlayingBlock = ^(XLVideoPlayer *player) {
-        [cell hiddenPlayView:NO];
-        [player destroyPlayer];
-        _player = nil;
-    };
-    
+    }
 }
 
 
+/*- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+ NSData * tempArchive = [NSKeyedArchiver archivedDataWithRootObject:_sectionHeaderView];
+ return [NSKeyedUnarchiver unarchiveObjectWithData:tempArchive];
+ }*/
 
+
+#pragma mark - tableView选中事件
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    NSNotification *notification =[NSNotification notificationWithName:@"userdata_event" object:nil userInfo:@{@"name":@"click"}];
+    [[NSNotificationCenter defaultCenter] postNotification:notification];
+    if (cellSelectedBlock) {
+        cellSelectedBlock(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
+    }
+    //[tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+// 去掉UItableview headerview黏性
+/*- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+ {
+ if (!_isSectionStickyHeader) {
+ CGFloat sectionHeaderHeight = 40;
+ if (scrollView.contentOffset.y<=sectionHeaderHeight&&scrollView.contentOffset.y>=0) {
+ scrollView.contentInset = UIEdgeInsetsMake(-scrollView.contentOffset.y, 0, 0, 0);
+ }
+ else if (scrollView.contentOffset.y>=sectionHeaderHeight) {
+ scrollView.contentInset = UIEdgeInsetsMake(-sectionHeaderHeight, 0, 0, 0);
+ }
+ }
+ 
+ }*/
+
+- (void)onDragUp:(DragUpBlock)block{ //上拉加载数据
+    if (block) {
+        dragUpBlock=block;
+        self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+            [self.mj_footer endRefreshing];
+            currentPage=currentPage+1;
+            
+            dragUpBlock(currentPage);
+            _drogUpState=YES;
+            //            if (cellDatas.count>0) {
+            //                [self.arrayDatas addObjectsFromArray:cellDatas];
+            //                dispatch_async(dispatch_get_main_queue(), ^{
+            //                    [self reloadData];
+            //                });
+            //            }else{
+            //                [self.mj_footer endRefreshingWithNoMoreData];
+            //            }
+        }];
+    }
+}
+
+- (void)onDragDown:(DragDownBlock)block{
+    //下拉刷新
+    if (block) {
+        dragDownBlock=block;
+        self.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+            [self.mj_header endRefreshing];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self reloadData];
+            });
+        }];
+    }
+}
+
+-(void)onScrollDid:(ScollViewDidBlock)block{
+    scollViewDidBlock=block;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    self.onTableViewDidScroll ? self.onTableViewDidScroll(self, scrollView.contentOffset) : nil;
+    if (scollViewDidBlock) {
+        scollViewDidBlock(scrollView);
+    }
+}
+
+- (void)noMoreData{
+    [self.mj_footer endRefreshingWithNoMoreData];
+}
 
 @end
 
