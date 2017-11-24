@@ -18,7 +18,8 @@ typedef void (^DragUpBlock)(int);
 typedef void (^DragDownBlock)();
 typedef CGFloat (^AutoChangeCellHeightBlock)(id,id);
 typedef NSArray*(^TitleForHeaderInSection)(void);
-typedef void (^Cellediting)(void);
+typedef void (^Cellediting)(NSIndexPath *,id);
+typedef void (^ScollViewDidBlock)(UIScrollView *);
 @interface EZJFastTableView : UITableView<UITableViewDelegate,UITableViewDataSource>
 
 @property (nonatomic, strong) void(^onTableViewDidScroll)(EZJFastTableView *tableView, CGPoint contentOffset);
@@ -83,8 +84,11 @@ typedef void (^Cellediting)(void);
 
 //插入数据
 - (void)insertData:(id)data;
-
+//用在上啦加载中
 - (void)addData:(NSArray *)arr;
+
+//用在普通加数据上
+- (void)addContentData:(NSArray *)arr;
 
 //右滑动删除
 - (void)onCellediting:(Cellediting)block;
@@ -94,6 +98,9 @@ typedef void (^Cellediting)(void);
 
 //滚动到底部
 - (void)scrollToBottom:(BOOL)animated;
+
+//滑动回调
+-(void)onScrollDid:(ScollViewDidBlock)block;
 
 - (void)noMoreData;
 @end
