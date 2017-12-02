@@ -260,8 +260,10 @@
         self.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
             [self.mj_footer endRefreshing];
             currentPage=currentPage+1;
+            if (dragUpBlock) {
+                dragUpBlock(currentPage);
+            }
             
-            dragUpBlock(currentPage);
             _drogUpState=YES;
             //            if (cellDatas.count>0) {
             //                [self.arrayDatas addObjectsFromArray:cellDatas];
@@ -281,6 +283,10 @@
         dragDownBlock=block;
         self.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
             [self.mj_header endRefreshing];
+            [self.mj_footer endRefreshing];
+            if (dragDownBlock) {
+                dragDownBlock();
+            }
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self reloadData];
             });
