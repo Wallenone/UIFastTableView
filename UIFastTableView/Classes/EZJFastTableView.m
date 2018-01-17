@@ -65,7 +65,9 @@
 #pragma mark - 单行tableview初始化 block回调
 - (id)initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
-        
+        self.estimatedRowHeight = 0;
+        self.estimatedSectionHeaderHeight = 0;
+        self.estimatedSectionFooterHeight = 0;
         currentPage=0;
         self.delegate = self;
         self.dataSource = self;
