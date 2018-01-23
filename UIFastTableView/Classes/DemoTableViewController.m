@@ -76,6 +76,19 @@
     [_tbv onCellSelected:^(NSIndexPath *indexPath, id cellData) {
         NSLog(@"click");
     }];
+    
+    [_tbv onCellediting:^(NSIndexPath *indexPath, id cellData) {
+        
+    } withCelleditBlock:^(NSIndexPath *indexPath,id cellData){
+        UITableViewRowAction *action0 = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"批量删除" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+            
+        }];
+        
+        UITableViewRowAction *action1 = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"删除" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+            
+        }];
+        return @[action1, action0];
+    }];
    
 	[self.view addSubview:_tbv];
 }

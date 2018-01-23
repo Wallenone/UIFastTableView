@@ -41,6 +41,7 @@
     AutoChangeCellHeightBlock autoChangeCellHeightBlock;
     Cellediting cellediting;
     ScollViewDidBlock scollViewDidBlock;
+    CelleditArrBlock celleditArrBlock;
 }
 //@synthesize customerViewName,columnNumber,reFreshPage;
 //@synthesize leftMargin,apartMargin,cellWidth;
@@ -146,6 +147,15 @@
     }
 }
 
+- (void)onCellediting:(Cellediting)block withCelleditBlock:(CelleditArrBlock)arrBlock{
+    if (block) {
+        cellediting=block;
+    }
+    if (arrBlock) {
+        celleditArrBlock=arrBlock;
+    }
+}
+
 - (void)scrollToTop:(BOOL)animated {
     [self setContentOffset:CGPointMake(0,0) animated:animated];
 }
@@ -222,6 +232,15 @@
     else if (editingStyle == UITableViewCellEditingStyleInsert) {
         
     }
+}
+
+- (NSArray *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (celleditArrBlock) {
+        return celleditArrBlock(indexPath,[self.arrayDatas objectAtIndex:indexPath.row]);
+    }
+    
+    return @[];
 }
 
 
