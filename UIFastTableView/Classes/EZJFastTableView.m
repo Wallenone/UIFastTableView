@@ -121,6 +121,17 @@
         [self reloadData];
     }
 }
+-(NSArray *)getDataArray{
+    return self.arrayDatas;
+}
+
+-(void)deleteCell:(NSArray *)arr{
+    for (NSIndexPath *indexPath in arr) {
+        [self.arrayDatas removeObjectAtIndex:indexPath.row];
+    }
+    
+    [self deleteRowsAtIndexPaths:arr withRowAnimation:UITableViewRowAnimationFade];
+}
 
 -(void)onBuildCell:(BuildCellBlock)block{
     if (block) {
@@ -159,6 +170,7 @@
 - (void)scrollToTop:(BOOL)animated {
     [self setContentOffset:CGPointMake(0,0) animated:animated];
 }
+
 
 - (void)scrollToBottom:(BOOL)animated {
     NSUInteger sectionCount = [self numberOfSections];

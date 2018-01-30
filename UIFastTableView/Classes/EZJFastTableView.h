@@ -77,6 +77,10 @@ typedef NSArray *(^CelleditArrBlock) (NSIndexPath *,id);
 - (void)setDataArray:(NSArray *)arr;
 
 /**
+ *  得到当前所有数据
+ */
+-(NSArray *)getDataArray;
+/**
  *  动态改变cell的高度
  */
 - (void)onChangeCellHeight:(AutoChangeCellHeightBlock)block;
@@ -107,6 +111,9 @@ typedef NSArray *(^CelleditArrBlock) (NSIndexPath *,id);
 -(void)onScrollDid:(ScollViewDidBlock)block;
 
 - (void)noMoreData;
+
+//手动删除某一行或者多行cell
+-(void)deleteCell:(NSArray *)arr;
 @end
 
 
